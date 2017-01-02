@@ -40,7 +40,7 @@ func NewTextWorker(c context.Context, m *linebot.TextMessage) Worker {
 // Reply return linebot.Message interface.
 func (w *TextWorker) Reply() []linebot.Message {
 	m := make([]linebot.Message, 0, MaxCalendarEventSize)
-	if !strings.Contains(w.message.Text, "休み") {
+	if !strings.Contains(w.message.Text, "祝日") {
 		m = append(m, linebot.NewTextMessage(w.message.Text+"???"))
 		return m
 	}

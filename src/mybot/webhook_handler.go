@@ -49,8 +49,7 @@ func handleWebhook(events []*linebot.Event, r *http.Request) {
 		tasks[i] = t
 	}
 
-	_, err := taskqueue.AddMulti(ctx, tasks, "default")
-	if err != nil {
+	if _, err := taskqueue.AddMulti(ctx, tasks, "default"); err != nil {
 		errorf(ctx, "taskqueue.AddMulti: %v", err)
 	}
 }
