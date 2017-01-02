@@ -111,7 +111,6 @@ func (w *ImageWorker) getConvertedImageURL() string {
 	id := appengine.AppID(w.ctx)
 
 	return "https://" + id + ".appspot.com/image?name=" + w.message.ID + ".jpeg"
-
 }
 
 // Converted implements image.Image, so you can

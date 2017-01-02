@@ -16,7 +16,7 @@ func NewWorker(c context.Context, e *linebot.Event) Worker {
 
 	switch m := e.Message.(type) {
 	case *linebot.TextMessage:
-		return NewTextWorker(m)
+		return NewTextWorker(c, m)
 	case *linebot.ImageMessage:
 		return NewImageWorker(c, m)
 	}

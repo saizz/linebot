@@ -7,6 +7,7 @@
 - go get -u google.golang.org/appengine
 - go get -u golang.org/x/oauth2
 - go get -u cloud.google.com/go/storage
+- go get -u google.golang.org/api
 
 ## get start
 

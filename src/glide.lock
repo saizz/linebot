@@ -1,5 +1,5 @@
 hash: a5a238d6d4e4d1da8630ada638f53c374e58fa86b1b1310f9ac80310107c31bf
-updated: 2017-01-02T18:10:30.706740645+09:00
+updated: 2017-01-03T01:40:29.040588032+09:00
 imports:
 - name: cloud.google.com/go
   version: e0ba5081473dca0a69826693dca7f03fc0e3d086
@@ -42,6 +42,7 @@ imports:
 - name: google.golang.org/api
   version: 55146ba61254fdb1c26d65ff3c04bc1611ad73fb
   subpackages:
+  - calendar/v3
   - gensupport
   - googleapi
   - googleapi/internal/uritemplates
