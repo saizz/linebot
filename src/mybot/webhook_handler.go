@@ -37,6 +37,7 @@ func init() {
 func handleWebhook(events []*linebot.Event, r *http.Request) {
 	ctx := newContext(r)
 	tasks := make([]*taskqueue.Task, len(events))
+
 	for i, e := range events {
 		j, err := json.Marshal(e)
 		if err != nil {
@@ -47,7 +48,11 @@ func handleWebhook(events []*linebot.Event, r *http.Request) {
 		t := taskqueue.NewPOSTTask("/task", url.Values{"data": {data}})
 		tasks[i] = t
 	}
-	taskqueue.AddMulti(ctx, tasks, "default")
+
+	_, err := taskqueue.AddMulti(ctx, tasks, "default")
+	if err != nil {
+		errorf(ctx, "taskqueue.AddMulti: %v", err)
+	}
 }
 
 // newLineBot create linebot Client.
