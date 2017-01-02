@@ -10,16 +10,20 @@
 
 ## get start
 
-1. make src/line.env file
+### add file
 
-```:line.env
+make src/line.env file
+
+``` :line.env
 LINE_BOT_CHANNEL_SECRET=<CHANNEL_SECRET>
 LINE_BOT_CHANNEL_TOKEN=<CHANNEL_TOKEN>
 ```
 
-1. set `application` in app.yaml
+### modify file
 
-1. deploy
+set `application` in app.yaml
+
+### deploy
 
 ```sh
 cd src
