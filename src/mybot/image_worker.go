@@ -48,8 +48,9 @@ func (w *ImageWorker) Reply() []linebot.Message {
 		return m
 	}
 
-	url := w.getConvertedImageURL()
-	m = append(m, linebot.NewImageMessage(url, url))
+	m = append(m, linebot.NewImageMessage(
+		w.getConvertedImageURL(),
+		w.getConvertedPreviewImageURL()))
 	m = append(m, linebot.NewTextMessage("covert done."))
 	return m
 }
@@ -111,6 +112,11 @@ func (w *ImageWorker) getConvertedImageURL() string {
 	id := appengine.AppID(w.ctx)
 
 	return "https://" + id + ".appspot.com/image?name=" + w.message.ID + ".jpeg"
+}
+
+// getConvertedPreviewImageURL retrun converted preview image url.
+func (w *ImageWorker) getConvertedPreviewImageURL() string {
+	return w.getConvertedImageURL() + "&preview=true"
 }
 
 // Converted implements image.Image, so you can

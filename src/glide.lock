@@ -1,8 +1,8 @@
 hash: a5a238d6d4e4d1da8630ada638f53c374e58fa86b1b1310f9ac80310107c31bf
-updated: 2017-01-03T01:40:29.040588032+09:00
+updated: 2017-01-08T15:24:47.51706519+09:00
 imports:
 - name: cloud.google.com/go
-  version: e0ba5081473dca0a69826693dca7f03fc0e3d086
+  version: c96c4486674a140772b9788370fa29898577bc0c
   subpackages:
   - compute/metadata
   - internal
@@ -21,8 +21,10 @@ imports:
   subpackages:
   - linebot
   - linebot/httphandler
+- name: github.com/nfnt/resize
+  version: 891127d8d1b52734debe1b3c3d7e747502b6c366
 - name: golang.org/x/net
-  version: 8fd7f25955530b92e73e9e1932a41b522b22ccd9
+  version: b7883d29650d340156352196ef5e434db117757b
   subpackages:
   - context
   - context/ctxhttp
@@ -39,8 +41,15 @@ imports:
   - internal
   - jws
   - jwt
+- name: golang.org/x/text
+  version: 44f4f658a783b0cee41fe0a23b8fc91d9c120558
+  subpackages:
+  - secure/bidirule
+  - transform
+  - unicode/bidi
+  - unicode/norm
 - name: google.golang.org/api
-  version: 55146ba61254fdb1c26d65ff3c04bc1611ad73fb
+  version: 025e50fdada431a9bc9ef7f06b4d504cd26bfa11
   subpackages:
   - calendar/v3
   - gensupport
@@ -53,7 +62,7 @@ imports:
   - storage/v1
   - transport
 - name: google.golang.org/appengine
-  version: 08a149cfaee099e6ce4be01c0113a78c85ee1dee
+  version: 8758a385849434ba5eac8aeedcf5192c5a0f5f10
   subpackages:
   - file
   - internal
@@ -71,7 +80,7 @@ imports:
   - taskqueue
   - urlfetch
 - name: google.golang.org/grpc
-  version: c8105071640ef29fce843ed96983e864bb18eb0e
+  version: 85497e2c516cd289bce5551b840ee27c2a0d6878
   subpackages:
   - codes
   - credentials

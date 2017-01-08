@@ -3,11 +3,22 @@ package mybot
 import (
 	"io/ioutil"
 	"net/http"
+	"strconv"
+
+	"github.com/nfnt/resize"
 
 	"cloud.google.com/go/storage"
 
+	"bytes"
+	"image/jpeg"
+
 	"google.golang.org/appengine"
 	"google.golang.org/appengine/file"
+)
+
+const (
+	// PreviewWidth is preview image width
+	PreviewWidth = 160
 )
 
 func init() {
@@ -22,6 +33,7 @@ func handleImage(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	name := r.FormValue("name")
+	preview := r.FormValue("preview")
 
 	ctx := appengine.NewContext(r)
 	bucket, err := file.DefaultBucketName(ctx)
@@ -45,6 +57,8 @@ func handleImage(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusInternalServerError)
 		return
 	}
+	defer reader.Close()
+
 	b, err := ioutil.ReadAll(reader)
 	if err != nil {
 		errorf(ctx, "handleImage Bucket ReadAll: %v", err)
@@ -52,6 +66,12 @@ func handleImage(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	if preview == "true" {
+		b = toPreview(b)
+	}
+
+	w.Header().Set("Content-Type", "image/jpeg")
+	w.Header().Set("Content-Length", strconv.Itoa(len(b)))
 	_, err = w.Write(b)
 	if err != nil {
 		errorf(ctx, "handleImage ResponseWriter Write: %v", err)
@@ -59,5 +79,19 @@ func handleImage(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	w.Header().Set("Content-Type", "image/jpeg")
+}
+
+// toPreview convert to preview image.
+func toPreview(org []byte) []byte {
+
+	img, err := jpeg.Decode(bytes.NewReader(org))
+	if err != nil {
+		return org
+	}
+
+	buf := new(bytes.Buffer)
+	jpeg.Encode(buf,
+		resize.Resize(PreviewWidth, 0, img, resize.Lanczos3), nil)
+
+	return buf.Bytes()
 }
