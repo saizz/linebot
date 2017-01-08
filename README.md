@@ -27,6 +27,8 @@ set `application` in app.yaml
 
 ### deploy
 
+set GOPATH to checkout root directory.
+
 ```sh
 cd src
 goapp deploy .
