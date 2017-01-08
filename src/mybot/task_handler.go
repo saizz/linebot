@@ -35,12 +35,12 @@ func handleTask(w http.ResponseWriter, r *http.Request) {
 	}
 	logf(ctx, "EventType: %s\nMessage: %#v", e.Type, e.Message)
 
-	//m := []linebot.Message{linebot.NewTextMessage("ok")}
-	wker := NewWorker(ctx, e)
-	if wker == nil {
-		return
-	}
-	m := wker.Reply()
+	m := []linebot.Message{linebot.NewTextMessage("ok")}
+	// wker := NewWorker(ctx, e)
+	// if wker == nil {
+	// 	return
+	// }
+	// m := wker.Reply()
 
 	bot, err := newLineBot(ctx)
 	if err != nil {
