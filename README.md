@@ -33,3 +33,7 @@ set GOPATH to checkout root directory.
 cd src
 goapp deploy .
 ```
+
+## great thanks
+
+I am deeply grateful to this site [LINE Developer Trialを GAE/Go で始める](http://qiita.com/koki_cheese/items/66980888d7e8755d01ec).
