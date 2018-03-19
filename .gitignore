@@ -86,3 +86,6 @@ $RECYCLE.BIN/
 
 # direnv
 .envrc
+
+# line config
+line.env
