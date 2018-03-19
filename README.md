@@ -10,6 +10,13 @@
 - go get -u google.golang.org/api... or go get -u google.golang.org/api/calendar/v3
 - go get -u github.com/nfnt/resize
 
+or 
+
+```
+cd src
+dep ensure
+```
+
 ## get start
 
 ### add file
