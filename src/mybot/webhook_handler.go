@@ -1,20 +1,18 @@
 package mybot
 
 import (
+	"context"
 	"encoding/base64"
 	"encoding/json"
 	"net/http"
 	"net/url"
 	"os"
 
-	"golang.org/x/net/context"
-
-	"google.golang.org/appengine/taskqueue"
-	"google.golang.org/appengine/urlfetch"
-
 	"github.com/joho/godotenv"
 	"github.com/line/line-bot-sdk-go/linebot"
 	"github.com/line/line-bot-sdk-go/linebot/httphandler"
+	"google.golang.org/appengine/taskqueue"
+	"google.golang.org/appengine/urlfetch"
 )
 
 var webhookHandler *httphandler.WebhookHandler

@@ -1,11 +1,11 @@
 package mybot
 
 import (
+	"context"
 	"strings"
 	"time"
 
 	"github.com/line/line-bot-sdk-go/linebot"
-	"golang.org/x/net/context"
 	"golang.org/x/oauth2/google"
 	calendar "google.golang.org/api/calendar/v3"
 )

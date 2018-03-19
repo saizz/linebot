@@ -1,7 +1,7 @@
 package mybot
 
 import (
-	"golang.org/x/net/context"
+	"context"
 
 	"github.com/line/line-bot-sdk-go/linebot"
 )

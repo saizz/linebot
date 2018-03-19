@@ -1,17 +1,14 @@
 package mybot
 
 import (
+	"bytes"
+	"image/jpeg"
 	"io/ioutil"
 	"net/http"
 	"strconv"
 
-	"github.com/nfnt/resize"
-
 	"cloud.google.com/go/storage"
-
-	"bytes"
-	"image/jpeg"
-
+	"github.com/nfnt/resize"
 	"google.golang.org/appengine"
 	"google.golang.org/appengine/file"
 )

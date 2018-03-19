@@ -2,18 +2,16 @@ package mybot
 
 import (
 	"bytes"
+	"context"
 	"image"
 	"image/color"
 	"image/jpeg"
 	"io/ioutil"
 
 	"cloud.google.com/go/storage"
+	"github.com/line/line-bot-sdk-go/linebot"
 	"google.golang.org/appengine"
 	"google.golang.org/appengine/file"
-
-	"golang.org/x/net/context"
-
-	"github.com/line/line-bot-sdk-go/linebot"
 )
 
 // ImageWorker is Worker for ImageMessage.
