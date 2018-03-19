@@ -13,7 +13,7 @@
 or 
 
 ```
-cd src
+cd src/mybot
 dep ensure
 ```
 

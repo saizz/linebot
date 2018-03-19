@@ -84,6 +84,9 @@ $RECYCLE.BIN/
 
 # End of https://www.gitignore.io/api/go,linux,macos,windows
 
+# go pkg directory
+/pkg/
+
 # direnv
 .envrc
 
