@@ -1,11 +1,14 @@
 package mybot
 
 import (
+	"context"
 	"encoding/json"
 	"io/ioutil"
 	"net/http"
 
 	"github.com/line/line-bot-sdk-go/linebot"
+	"google.golang.org/appengine"
+	"google.golang.org/appengine/log"
 )
 
 func init() {
@@ -15,45 +18,43 @@ func init() {
 // handleTask hadle task.
 func handleTask(w http.ResponseWriter, r *http.Request) {
 
-	ctx := newContext(r)
-	e, err := getEvent(r)
+	ctx := appengine.NewContext(r)
+	event, err := getEvent(ctx, r)
 	if err != nil {
-		errorf(ctx, "getEvent: %v", err)
+		log.Errorf(ctx, "getEvent: %v", err)
 		return
 	}
 
-	logf(ctx, "EventType: %s\nMessage: %#v", e.Type, e.Message)
-
-	//m := []linebot.Message{linebot.NewTextMessage("ok")}
-	wk := NewWorker(ctx, e)
-	if wk == nil {
+	//msgs := []linebot.Message{linebot.NewTextMessage("ok")}
+	worker := NewWorker(ctx, event)
+	if worker == nil {
 		return
 	}
-	m := wk.Reply()
+	msgs := worker.Reply()
 
 	bot, err := newLineBot(ctx)
 	if err != nil {
-		errorf(ctx, "newLineBot: %v", err)
+		log.Errorf(ctx, "newLineBot: %v", err)
 		return
 	}
 
-	if _, err = bot.ReplyMessage(e.ReplyToken, m...).WithContext(ctx).Do(); err != nil {
-		errorf(ctx, "ReplayMessage: %v", err)
+	if _, err = bot.ReplyMessage(event.ReplyToken, msgs...).WithContext(ctx).Do(); err != nil {
+		log.Errorf(ctx, "ReplayMessage: %v", err)
 		return
 	}
-
-	w.WriteHeader(http.StatusOK)
 }
 
 // getEvent get linebot Event from http request.
-func getEvent(r *http.Request) (e *linebot.Event, err error) {
+func getEvent(ctx context.Context, r *http.Request) (e *linebot.Event, err error) {
 
 	var b []byte
+	e = new(linebot.Event)
 	if b, err = ioutil.ReadAll(r.Body); err != nil {
 		return
 	}
 	defer r.Body.Close()
 
+	log.Infof(ctx, "event: %v", string(b))
 	err = json.Unmarshal(b, e)
 
 	return

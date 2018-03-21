@@ -1,17 +1,19 @@
 package mybot
 
 import (
-	"bytes"
 	"context"
+	"fmt"
 	"image"
 	"image/color"
 	"image/jpeg"
-	"io/ioutil"
 
 	"cloud.google.com/go/storage"
 	"github.com/line/line-bot-sdk-go/linebot"
 	"google.golang.org/appengine"
+	"google.golang.org/appengine/blobstore"
 	"google.golang.org/appengine/file"
+	gaeimage "google.golang.org/appengine/image"
+	"google.golang.org/appengine/log"
 )
 
 // ImageWorker is Worker for ImageMessage.
@@ -34,14 +36,14 @@ func (w *ImageWorker) Reply() []linebot.Message {
 
 	img, err := w.getImageContent()
 	if err != nil {
-		errorf(w.ctx, "getImageContent: %v", err)
+		log.Errorf(w.ctx, "getImageContent: %v", err)
 		m = append(m, linebot.NewTextMessage("cant get image."))
 		return m
 	}
 
 	err = w.storeImage(toGrayscale(img))
 	if err != nil {
-		errorf(w.ctx, "storeImage: %v", err)
+		log.Errorf(w.ctx, "storeImage: %v", err)
 		m = append(m, linebot.NewTextMessage("cant save storeage."))
 		return m
 	}
@@ -49,6 +51,16 @@ func (w *ImageWorker) Reply() []linebot.Message {
 	m = append(m, linebot.NewImageMessage(
 		w.getConvertedImageURL(),
 		w.getConvertedPreviewImageURL()))
+
+	servingURL, err := w.getServingURL()
+	if err != nil {
+		m = append(m, linebot.NewTextMessage("cat get serving URL."))
+	}
+
+	m = append(m, linebot.NewImageMessage(
+		servingURL,
+		servingURL+"=s128-cc"))
+
 	m = append(m, linebot.NewTextMessage("covert done."))
 	return m
 }
@@ -67,12 +79,7 @@ func (w *ImageWorker) getImageContent() (image.Image, error) {
 	}
 	defer res.Content.Close()
 
-	b, err := ioutil.ReadAll(res.Content)
-	if err != nil {
-		return nil, err
-	}
-
-	img, err := jpeg.Decode(bytes.NewReader(b))
+	img, err := jpeg.Decode(res.Content)
 	if err != nil {
 		return nil, err
 	}
@@ -94,11 +101,41 @@ func (w *ImageWorker) storeImage(img image.Image) error {
 	}
 	defer client.Close()
 
-	writer := client.Bucket(bucket).Object(w.message.ID + ".jpeg").NewWriter(w.ctx)
+	writer := client.Bucket(bucket).Object(w.getObjectName()).NewWriter(w.ctx)
 	writer.ContentType = "image/jpeg"
-	defer writer.Close()
 
-	return jpeg.Encode(writer, img, nil)
+	if err := jpeg.Encode(writer, img, nil); err != nil {
+		return err
+	}
+
+	return writer.Close()
+}
+
+// getObjectName return GCS object name.
+func (w *ImageWorker) getObjectName() string {
+	return w.message.ID + ".jpeg"
+}
+
+func (w *ImageWorker) getServingURL() (string, error) {
+
+	bucket, err := file.DefaultBucketName(w.ctx)
+	if err != nil {
+		return "", err
+	}
+
+	gsURL := fmt.Sprintf("/gs/%s/%s", bucket, w.getObjectName())
+	blobKey, err := blobstore.BlobKeyForFile(w.ctx, gsURL)
+	if err != nil {
+		return "", err
+	}
+
+	opts := &gaeimage.ServingURLOptions{Secure: true}
+	url, err := gaeimage.ServingURL(w.ctx, blobKey, opts)
+	if err != nil {
+		return "", err
+	}
+	log.Infof(w.ctx, "servingURL: %v", url)
+	return url.String(), nil
 }
 
 // getConvertedImageUrl return converted image url.

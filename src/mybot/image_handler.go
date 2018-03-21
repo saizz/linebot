@@ -11,6 +11,7 @@ import (
 	"github.com/nfnt/resize"
 	"google.golang.org/appengine"
 	"google.golang.org/appengine/file"
+	"google.golang.org/appengine/log"
 )
 
 const (
@@ -35,14 +36,14 @@ func handleImage(w http.ResponseWriter, r *http.Request) {
 	ctx := appengine.NewContext(r)
 	bucket, err := file.DefaultBucketName(ctx)
 	if err != nil {
-		errorf(ctx, "handleImage DefaultBucketName: %v", err)
+		log.Errorf(ctx, "handleImage DefaultBucketName: %v", err)
 		w.WriteHeader(http.StatusInternalServerError)
 		return
 	}
 
 	client, err := storage.NewClient(ctx)
 	if err != nil {
-		errorf(ctx, "handleImage storage.NewClient: %v", err)
+		log.Errorf(ctx, "handleImage storage.NewClient: %v", err)
 		w.WriteHeader(http.StatusInternalServerError)
 		return
 	}
@@ -50,7 +51,7 @@ func handleImage(w http.ResponseWriter, r *http.Request) {
 
 	reader, err := client.Bucket(bucket).Object(name).NewReader(ctx)
 	if err != nil {
-		errorf(ctx, "handleImage Bucket NewReader: %v", err)
+		log.Errorf(ctx, "handleImage Bucket NewReader: %v", err)
 		w.WriteHeader(http.StatusInternalServerError)
 		return
 	}
@@ -58,7 +59,7 @@ func handleImage(w http.ResponseWriter, r *http.Request) {
 
 	b, err := ioutil.ReadAll(reader)
 	if err != nil {
-		errorf(ctx, "handleImage Bucket ReadAll: %v", err)
+		log.Errorf(ctx, "handleImage Bucket ReadAll: %v", err)
 		w.WriteHeader(http.StatusInternalServerError)
 		return
 	}
@@ -71,7 +72,7 @@ func handleImage(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Length", strconv.Itoa(len(b)))
 	_, err = w.Write(b)
 	if err != nil {
-		errorf(ctx, "handleImage ResponseWriter Write: %v", err)
+		log.Errorf(ctx, "handleImage ResponseWriter Write: %v", err)
 		w.WriteHeader(http.StatusInternalServerError)
 		return
 	}

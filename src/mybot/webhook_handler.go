@@ -9,6 +9,8 @@ import (
 	"github.com/joho/godotenv"
 	"github.com/line/line-bot-sdk-go/linebot"
 	"github.com/line/line-bot-sdk-go/linebot/httphandler"
+	"google.golang.org/appengine"
+	"google.golang.org/appengine/log"
 	"google.golang.org/appengine/taskqueue"
 	"google.golang.org/appengine/urlfetch"
 )
@@ -42,19 +44,19 @@ func newLineBot(c context.Context) (*linebot.Client, error) {
 
 // handleCallback handle webhook from linebot server and regist task queue.
 func handleWebhook(events []*linebot.Event, r *http.Request) {
-	ctx := newContext(r)
-	tasks := make([]*taskqueue.Task, len(events))
+	ctx := appengine.NewContext(r)
+	tasks := make([]*taskqueue.Task, 0, len(events))
 
-	for i, e := range events {
+	for _, e := range events {
 		t, err := newPOSTJSONTask("/task", e)
 		if err != nil {
 			continue
 		}
-		tasks[i] = t
+		tasks = append(tasks, t)
 	}
 
 	if _, err := taskqueue.AddMulti(ctx, tasks, "linebot-worker"); err != nil {
-		errorf(ctx, "taskqueue.AddMulti: %v", err)
+		log.Errorf(ctx, "taskqueue.AddMulti: %v", err)
 	}
 }
 

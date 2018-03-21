@@ -46,7 +46,7 @@
     "linebot",
     "linebot/httphandler"
   ]
-  revision = "d4ced09142ce79e437333846480ab079844787cf"
+  revision = "46a3c3356fd3b127d27b0f9d04c3c4ee009f23b1"
 
 [[projects]]
   branch = "master"
@@ -57,11 +57,11 @@
 [[projects]]
   name = "go.opencensus.io"
   packages = [
+    "exporter/stackdriver/propagation",
     "internal",
     "internal/tagencoding",
     "plugin/ochttp",
     "plugin/ochttp/propagation/b3",
-    "plugin/ochttp/propagation/google",
     "stats",
     "stats/internal",
     "stats/view",
@@ -85,7 +85,7 @@
     "lex/httplex",
     "trace"
   ]
-  revision = "24dd3780ca4f75fed9f321890729414a4b5d3f13"
+  revision = "6078986fec03a1dcc236c34816c71b0e05018fda"
 
 [[projects]]
   branch = "master"
@@ -135,17 +135,22 @@
     "storage/v1",
     "transport/http"
   ]
-  revision = "55e9fb4044f4757138d4273ace23060d022d18f9"
+  revision = "24928b980e6919be4c72647aacd53ebcbb8c4bab"
 
 [[projects]]
   name = "google.golang.org/appengine"
   packages = [
     ".",
+    "blobstore",
+    "datastore",
     "file",
+    "image",
     "internal",
     "internal/app_identity",
     "internal/base",
+    "internal/blobstore",
     "internal/datastore",
+    "internal/image",
     "internal/log",
     "internal/modules",
     "internal/remote_api",
@@ -201,6 +206,6 @@
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
-  inputs-digest = "945079169f14f129fee82106f3d6a1f40d9b497ca043321b96ac2b2b05208e36"
+  inputs-digest = "37fc78feca58f0b50021b8292bebd09a0bc2e6babf12563355d9035b08f5e136"
   solver-name = "gps-cdcl"
   solver-version = 1

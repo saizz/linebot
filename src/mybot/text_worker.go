@@ -8,6 +8,7 @@ import (
 	"github.com/line/line-bot-sdk-go/linebot"
 	"golang.org/x/oauth2/google"
 	calendar "google.golang.org/api/calendar/v3"
+	"google.golang.org/appengine/log"
 )
 
 const (
@@ -47,7 +48,7 @@ func (w *TextWorker) Reply() []linebot.Message {
 
 	events, err := w.getCalendarEvents()
 	if err != nil {
-		errorf(w.ctx, "getCalendarEvents: %v", err)
+		log.Errorf(w.ctx, "getCalendarEvents: %v", err)
 		m = append(m, linebot.NewTextMessage("cant get calendar."))
 		return m
 	}
@@ -78,7 +79,7 @@ func (w *TextWorker) getCalendarEvents() ([]*calendar.Event, error) {
 
 	start := nowJST()
 	end := start.AddDate(0, MonthSuffix, 0)
-	logf(w.ctx, "getCalendar start: %v, end: %v", start, end)
+	log.Infof(w.ctx, "getCalendar start: %v, end: %v", start, end)
 
 	events, err := svc.Events.List(CalendarID).
 		TimeMin(start.Format(time.RFC3339)).
