@@ -1,8 +1,8 @@
 package mybot
 
 import (
-	"encoding/base64"
 	"encoding/json"
+	"io/ioutil"
 	"net/http"
 
 	"github.com/line/line-bot-sdk-go/linebot"
@@ -14,33 +14,22 @@ func init() {
 
 // handleTask hadle task.
 func handleTask(w http.ResponseWriter, r *http.Request) {
+
 	ctx := newContext(r)
-	data := r.FormValue("data")
-	if data == "" {
-		errorf(ctx, "No data")
+	e, err := getEvent(r)
+	if err != nil {
+		errorf(ctx, "getEvent: %v", err)
 		return
 	}
 
-	j, err := base64.StdEncoding.DecodeString(data)
-	if err != nil {
-		errorf(ctx, "base64 DecodeString: %v", err)
-		return
-	}
-
-	e := new(linebot.Event)
-	err = json.Unmarshal(j, e)
-	if err != nil {
-		errorf(ctx, "json.Unmarshal: %v", err)
-		return
-	}
 	logf(ctx, "EventType: %s\nMessage: %#v", e.Type, e.Message)
 
-	m := []linebot.Message{linebot.NewTextMessage("ok")}
-	// wker := NewWorker(ctx, e)
-	// if wker == nil {
-	// 	return
-	// }
-	// m := wker.Reply()
+	//m := []linebot.Message{linebot.NewTextMessage("ok")}
+	wk := NewWorker(ctx, e)
+	if wk == nil {
+		return
+	}
+	m := wk.Reply()
 
 	bot, err := newLineBot(ctx)
 	if err != nil {
@@ -54,4 +43,18 @@ func handleTask(w http.ResponseWriter, r *http.Request) {
 	}
 
 	w.WriteHeader(http.StatusOK)
+}
+
+// getEvent get linebot Event from http request.
+func getEvent(r *http.Request) (e *linebot.Event, err error) {
+
+	var b []byte
+	if b, err = ioutil.ReadAll(r.Body); err != nil {
+		return
+	}
+	defer r.Body.Close()
+
+	err = json.Unmarshal(b, e)
+
+	return
 }

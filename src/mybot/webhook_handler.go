@@ -2,10 +2,8 @@ package mybot
 
 import (
 	"context"
-	"encoding/base64"
 	"encoding/json"
 	"net/http"
-	"net/url"
 	"os"
 
 	"github.com/joho/godotenv"
@@ -27,8 +25,19 @@ func init() {
 		os.Getenv("LINE_BOT_CHANNEL_SECRET"),
 		os.Getenv("LINE_BOT_CHANNEL_TOKEN"),
 	)
+	if err != nil {
+		panic(err)
+	}
+
 	webhookHandler.HandleEvents(handleWebhook)
 	http.Handle("/webhook", webhookHandler)
+}
+
+// newLineBot create linebot Client.
+func newLineBot(c context.Context) (*linebot.Client, error) {
+	return webhookHandler.NewClient(
+		linebot.WithHTTPClient(urlfetch.Client(c)),
+	)
 }
 
 // handleCallback handle webhook from linebot server and regist task queue.
@@ -37,24 +46,31 @@ func handleWebhook(events []*linebot.Event, r *http.Request) {
 	tasks := make([]*taskqueue.Task, len(events))
 
 	for i, e := range events {
-		j, err := json.Marshal(e)
+		t, err := newPOSTJSONTask("/task", e)
 		if err != nil {
-			errorf(ctx, "json.Marshal: %v", err)
-			return
+			continue
 		}
-		data := base64.StdEncoding.EncodeToString(j)
-		t := taskqueue.NewPOSTTask("/task", url.Values{"data": {data}})
 		tasks[i] = t
 	}
 
-	if _, err := taskqueue.AddMulti(ctx, tasks, "default"); err != nil {
+	if _, err := taskqueue.AddMulti(ctx, tasks, "linebot-worker"); err != nil {
 		errorf(ctx, "taskqueue.AddMulti: %v", err)
 	}
 }
 
-// newLineBot create linebot Client.
-func newLineBot(c context.Context) (*linebot.Client, error) {
-	return webhookHandler.NewClient(
-		linebot.WithHTTPClient(urlfetch.Client(c)),
-	)
+func newPOSTJSONTask(path string, i interface{}) (*taskqueue.Task, error) {
+	h := make(http.Header)
+	h.Set("Content-Type", "application/json")
+
+	j, err := json.Marshal(i)
+	if err != nil {
+		return nil, err
+	}
+
+	return &taskqueue.Task{
+		Path:    path,
+		Payload: j,
+		Header:  h,
+		Method:  "POST",
+	}, nil
 }

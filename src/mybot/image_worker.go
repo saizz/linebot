@@ -98,11 +98,7 @@ func (w *ImageWorker) storeImage(img image.Image) error {
 	writer.ContentType = "image/jpeg"
 	defer writer.Close()
 
-	if err := jpeg.Encode(writer, img, nil); err != nil {
-		return err
-	}
-
-	return nil
+	return jpeg.Encode(writer, img, nil)
 }
 
 // getConvertedImageUrl return converted image url.
