@@ -12,8 +12,12 @@ import (
 )
 
 const (
-	// CalendarID is google calendar id
-	CalendarID = "japanese__ja@holiday.calendar.google.com"
+	// jaHolidayCal is japanese holiday calendar
+	jaHolidayCal = "japanese__ja@holiday.calendar.google.com"
+	// fgSpaceCal is FG-Space calendar
+	fgSpaceCal = "freegufo.com_63de9ce3hvo4eruplc0sg8ii50@group.calendar.google.com"
+	// chigaLoginCal is chigasaki LOGIN calendar
+	chigaLoginCal = "wifi.de.login@gmail.com"
 	// MonthSuffix is End time after 'MonthSuffix' months
 	MonthSuffix = 6
 	// MaxCalendarEventSize is max size getting from google calendar
@@ -67,7 +71,12 @@ func (w *TextWorker) Reply() []linebot.Message {
 
 // getCalendar get google calendar event.
 func (w *TextWorker) getCalendarEvents() ([]*calendar.Event, error) {
-	client, err := google.DefaultClient(w.ctx, calendar.CalendarReadonlyScope)
+	return getCalendarEventsInternal(w.ctx, jaHolidayCal)
+}
+
+func getCalendarEventsInternal(ctx context.Context, id string) ([]*calendar.Event, error) {
+
+	client, err := google.DefaultClient(ctx, calendar.CalendarReadonlyScope)
 	if err != nil {
 		return nil, err
 	}
@@ -79,9 +88,9 @@ func (w *TextWorker) getCalendarEvents() ([]*calendar.Event, error) {
 
 	start := nowJST()
 	end := start.AddDate(0, MonthSuffix, 0)
-	log.Infof(w.ctx, "getCalendar start: %v, end: %v", start, end)
+	log.Infof(ctx, "getCalendar start: %v, end: %v", start, end)
 
-	events, err := svc.Events.List(CalendarID).
+	events, err := svc.Events.List(id).
 		TimeMin(start.Format(time.RFC3339)).
 		TimeMax(end.Format(time.RFC3339)).
 		TimeZone(TimeZone).
@@ -93,6 +102,7 @@ func (w *TextWorker) getCalendarEvents() ([]*calendar.Event, error) {
 	}
 
 	return events.Items, nil
+
 }
 
 func nowJST() time.Time {
