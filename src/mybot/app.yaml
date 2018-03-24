@@ -6,6 +6,9 @@ handlers:
   script: _go_app
   login: admin
   secure: always
+- url: /robots.txt
+  static_files: robots.txt
+  upload: robots.txt
 - url: /.*
   script: _go_app
   secure: always
