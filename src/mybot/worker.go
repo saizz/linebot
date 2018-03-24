@@ -8,17 +8,17 @@ import (
 
 // Worker has Reply method which return linebot.Message interface.
 type Worker interface {
-	Reply() []linebot.Message
+	Reply(context.Context) []linebot.Message
 }
 
 // NewWorker create new Worker.
-func NewWorker(c context.Context, e *linebot.Event) Worker {
+func NewWorker(e *linebot.Event) Worker {
 
 	switch m := e.Message.(type) {
 	case *linebot.TextMessage:
-		return NewTextWorker(c, m)
+		return NewTextWorker(m)
 	case *linebot.ImageMessage:
-		return NewImageWorker(c, m)
+		return NewImageWorker(m)
 	}
 
 	return nil

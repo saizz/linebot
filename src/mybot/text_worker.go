@@ -30,29 +30,27 @@ const (
 
 // TextWorker is Worker for TextMessage.
 type TextWorker struct {
-	ctx     context.Context
 	message *linebot.TextMessage
 }
 
 // NewTextWorker create new Worker.
-func NewTextWorker(c context.Context, m *linebot.TextMessage) Worker {
+func NewTextWorker(m *linebot.TextMessage) Worker {
 	return &TextWorker{
-		ctx:     c,
 		message: m,
 	}
 }
 
 // Reply return linebot.Message interface.
-func (w *TextWorker) Reply() []linebot.Message {
+func (w *TextWorker) Reply(ctx context.Context) []linebot.Message {
 	m := make([]linebot.Message, 0, MaxCalendarEventSize)
 	if !strings.Contains(w.message.Text, "祝日") {
 		m = append(m, linebot.NewTextMessage(w.message.Text+"???"))
 		return m
 	}
 
-	events, err := w.getCalendarEvents()
+	events, err := w.getCalendarEvents(ctx)
 	if err != nil {
-		log.Errorf(w.ctx, "getCalendarEvents: %v", err)
+		log.Errorf(ctx, "getCalendarEvents: %v", err)
 		m = append(m, linebot.NewTextMessage("cant get calendar."))
 		return m
 	}
@@ -70,8 +68,8 @@ func (w *TextWorker) Reply() []linebot.Message {
 }
 
 // getCalendar get google calendar event.
-func (w *TextWorker) getCalendarEvents() ([]*calendar.Event, error) {
-	return getCalendarEventsInternal(w.ctx, jaHolidayCal)
+func (w *TextWorker) getCalendarEvents(ctx context.Context) ([]*calendar.Event, error) {
+	return getCalendarEventsInternal(ctx, jaHolidayCal)
 }
 
 func getCalendarEventsInternal(ctx context.Context, id string) ([]*calendar.Event, error) {

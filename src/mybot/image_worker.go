@@ -18,43 +18,41 @@ import (
 
 // ImageWorker is Worker for ImageMessage.
 type ImageWorker struct {
-	ctx     context.Context
 	message *linebot.ImageMessage
 }
 
 // NewImageWorker create new Worker.
-func NewImageWorker(c context.Context, m *linebot.ImageMessage) Worker {
+func NewImageWorker(m *linebot.ImageMessage) Worker {
 	return &ImageWorker{
-		ctx:     c,
 		message: m,
 	}
 }
 
 // Reply return linebot.Message interface.
-func (w *ImageWorker) Reply() []linebot.Message {
+func (w *ImageWorker) Reply(ctx context.Context) []linebot.Message {
 	m := make([]linebot.Message, 0, 2)
 
-	img, err := w.getImageContent()
+	img, err := w.getImageContent(ctx)
 	if err != nil {
-		log.Errorf(w.ctx, "getImageContent: %v", err)
+		log.Errorf(ctx, "getImageContent: %v", err)
 		m = append(m, linebot.NewTextMessage("cant get image."))
 		return m
 	}
 
-	err = w.storeImage(toGrayscale(img))
+	err = w.storeImage(ctx, toGrayscale(img))
 	if err != nil {
-		log.Errorf(w.ctx, "storeImage: %v", err)
+		log.Errorf(ctx, "storeImage: %v", err)
 		m = append(m, linebot.NewTextMessage("cant save storeage."))
 		return m
 	}
 
 	m = append(m, linebot.NewImageMessage(
-		w.getConvertedImageURL(),
-		w.getConvertedPreviewImageURL()))
+		w.getConvertedImageURL(ctx),
+		w.getConvertedPreviewImageURL(ctx)))
 
-	servingURL, err := w.getServingURL()
+	servingURL, err := w.getServingURL(ctx)
 	if err != nil {
-		m = append(m, linebot.NewTextMessage("cat get serving URL."))
+		m = append(m, linebot.NewTextMessage("cant get serving URL."))
 	}
 
 	m = append(m, linebot.NewImageMessage(
@@ -66,14 +64,14 @@ func (w *ImageWorker) Reply() []linebot.Message {
 }
 
 // getImageContent get Message Content from linebot server.
-func (w *ImageWorker) getImageContent() (image.Image, error) {
+func (w *ImageWorker) getImageContent(ctx context.Context) (image.Image, error) {
 
-	bot, err := newLineBot(w.ctx)
+	bot, err := newLineBot(ctx)
 	if err != nil {
 		return nil, err
 	}
 
-	res, err := bot.GetMessageContent(w.message.ID).WithContext(w.ctx).Do()
+	res, err := bot.GetMessageContent(w.message.ID).WithContext(ctx).Do()
 	if err != nil {
 		return nil, err
 	}
@@ -88,20 +86,20 @@ func (w *ImageWorker) getImageContent() (image.Image, error) {
 }
 
 // storeImage store imge to GCS.
-func (w *ImageWorker) storeImage(img image.Image) error {
+func (w *ImageWorker) storeImage(ctx context.Context, img image.Image) error {
 
-	bucket, err := file.DefaultBucketName(w.ctx)
+	bucket, err := file.DefaultBucketName(ctx)
 	if err != nil {
 		return err
 	}
 
-	client, err := storage.NewClient(w.ctx)
+	client, err := storage.NewClient(ctx)
 	if err != nil {
 		return err
 	}
 	defer client.Close()
 
-	writer := client.Bucket(bucket).Object(w.getObjectName()).NewWriter(w.ctx)
+	writer := client.Bucket(bucket).Object(w.getObjectName()).NewWriter(ctx)
 	writer.ContentType = "image/jpeg"
 
 	if err := jpeg.Encode(writer, img, nil); err != nil {
@@ -116,38 +114,38 @@ func (w *ImageWorker) getObjectName() string {
 	return w.message.ID + ".jpeg"
 }
 
-func (w *ImageWorker) getServingURL() (string, error) {
+func (w *ImageWorker) getServingURL(ctx context.Context) (string, error) {
 
-	bucket, err := file.DefaultBucketName(w.ctx)
+	bucket, err := file.DefaultBucketName(ctx)
 	if err != nil {
 		return "", err
 	}
 
 	gsURL := fmt.Sprintf("/gs/%s/%s", bucket, w.getObjectName())
-	blobKey, err := blobstore.BlobKeyForFile(w.ctx, gsURL)
+	blobKey, err := blobstore.BlobKeyForFile(ctx, gsURL)
 	if err != nil {
 		return "", err
 	}
 
 	opts := &gaeimage.ServingURLOptions{Secure: true}
-	url, err := gaeimage.ServingURL(w.ctx, blobKey, opts)
+	url, err := gaeimage.ServingURL(ctx, blobKey, opts)
 	if err != nil {
 		return "", err
 	}
-	log.Infof(w.ctx, "servingURL: %v", url)
+	log.Infof(ctx, "servingURL: %v", url)
 	return url.String(), nil
 }
 
 // getConvertedImageUrl return converted image url.
-func (w *ImageWorker) getConvertedImageURL() string {
-	id := appengine.AppID(w.ctx)
+func (w *ImageWorker) getConvertedImageURL(ctx context.Context) string {
+	id := appengine.AppID(ctx)
 
 	return "https://" + id + ".appspot.com/image?name=" + w.message.ID + ".jpeg"
 }
 
 // getConvertedPreviewImageURL retrun converted preview image url.
-func (w *ImageWorker) getConvertedPreviewImageURL() string {
-	return w.getConvertedImageURL() + "&preview=true"
+func (w *ImageWorker) getConvertedPreviewImageURL(ctx context.Context) string {
+	return w.getConvertedImageURL(ctx) + "&preview=true"
 }
 
 // Converted implements image.Image, so you can

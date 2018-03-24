@@ -26,11 +26,11 @@ func handleTask(w http.ResponseWriter, r *http.Request) {
 	}
 
 	//msgs := []linebot.Message{linebot.NewTextMessage("ok")}
-	worker := NewWorker(ctx, event)
+	worker := NewWorker(event)
 	if worker == nil {
 		return
 	}
-	msgs := worker.Reply()
+	msgs := worker.Reply(ctx)
 
 	bot, err := newLineBot(ctx)
 	if err != nil {
