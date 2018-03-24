@@ -25,6 +25,7 @@ var (
 	errorResponse []byte
 )
 
+// dialogflowRequest is structure of request body from dialogflow.
 type dialogflowRequest struct {
 	ID     string `json:"id"`
 	Result result `json:"result"`
@@ -43,6 +44,7 @@ type metadata struct {
 	IntentName string `json:"intentName"`
 }
 
+// response is structure of respose to dialogflow.
 type response struct {
 	Speech      string `json:"speech"`
 	DisplayText string `json:"displayText"`
@@ -89,6 +91,7 @@ func handleDialogflow(w http.ResponseWriter, r *http.Request) {
 	_, _ = w.Write(toResponse(text, text))
 }
 
+// resolveCalendar resolve calendar.
 func resolveCalendar(i *dialogflowRequest) (string, error) {
 
 	if cal, ok := i.Result.Parameters["calendar"]; ok {
@@ -100,6 +103,7 @@ func resolveCalendar(i *dialogflowRequest) (string, error) {
 	return "", errors.New("どのカレンダーがわかりませんでした。")
 }
 
+// getCalendarID return calendar id.
 func getCalendarID(cal string) string {
 
 	switch cal {
@@ -114,6 +118,7 @@ func getCalendarID(cal string) string {
 	return ""
 }
 
+// toResponse return []byte of response to dialogflow.
 func toResponse(speech, text string) []byte {
 
 	res := &response{
